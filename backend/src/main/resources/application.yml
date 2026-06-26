@@ -1,0 +1,22 @@
+#spring.application.name=demo
+server:
+  port: 8080
+
+spring:
+  application:
+    name: YKK_BACKEND
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/testdb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    defer-datasource-initialization: true
+
+  #schema.sql 과 data.sql 관리 가능 ( always|never )
+  sql:
+    init:
+      mode: always
