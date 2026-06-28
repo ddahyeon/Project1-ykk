@@ -42,6 +42,7 @@ public class BankServiceImpl implements BankService{
                         account.getAccountnum(),
                         account.getSavingtype(),
                         account.getInterest(),
+                        (float)account.getInterestrate()/100,
                         account.getAmount()))
                 .toList();
     }

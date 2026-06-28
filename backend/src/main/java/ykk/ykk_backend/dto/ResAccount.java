@@ -11,5 +11,6 @@ public class ResAccount {
     private String account;
     private SavingType savingtype;
     private int interest;
+    private float rate;
     private int amount;
 }
