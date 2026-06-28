@@ -1,0 +1,51 @@
+# 06-backend-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ykk-backend
+  namespace: ykk
+  labels:
+  app: ykk-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:               # 해당하는 Label과 일치하는 Pod를 선택함
+      app: ykk-backend
+  template:
+    metadata:
+      labels:                   # Deployment라서 pod를 자동으로 생성함 여기 있는 Label을 Pod에 붙여줌 
+        app: ykk-backend
+    spec:
+      containers:
+        - name: ykk-backend
+          image: ori268/todo-springboot:1.0  # 이미지 가져와야 됨
+          imagePullPolicy: IfNotPresent              # 이미 이미지가 있으면 그대로 쓰고, 없으면 Docker Hub에서 다운로드함
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ykk-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ykk-config
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ykk-config
+                  key: DB_NAME
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_PASSWORD

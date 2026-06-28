@@ -1,0 +1,14 @@
+# 05-frontend-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ykk-frontend-service
+  namespace: ykk
+spec: 
+  selector:
+    app: ykk-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+  type: NodePort

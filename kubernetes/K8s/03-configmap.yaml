@@ -1,0 +1,11 @@
+# 03-configmap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ykk-config
+  namespace: ykk
+data:
+  DB_HOST: "mysql-service"
+  DB_PORT: "3306"
+  DB_NAME: "ykkdb"

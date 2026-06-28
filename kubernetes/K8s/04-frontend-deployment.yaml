@@ -1,0 +1,25 @@
+# 04-frontend-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ykk-frontend
+  namespace: ykk
+  labels:
+    app: ykk-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ykk-frontend
+  template:
+    metadata:
+      labels:
+        app: ykk-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: nginx:latest # 이미지 기입
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
