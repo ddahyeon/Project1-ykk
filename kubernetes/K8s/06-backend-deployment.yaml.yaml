@@ -1,0 +1,51 @@
+# 06-backend-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ykk-backend
+  namespace: ykk
+  labels:
+  app: ykk-backend
+spec:
+  replicas: 1                  # 테스트 환경으로 Backend Pod 1개 실행으로 설정했습니다.
+  selector:
+    matchLabels:               
+      app: ykk-backend
+  template:
+    metadata:
+      labels:                    
+        app: ykk-backend
+    spec:
+      containers:
+        - name: ykk-backend
+          image: ori268/todo-springboot:1.0  # 이미지 가져와야 됨
+          imagePullPolicy: IfNotPresent              
+          ports:
+            - containerPort: 8080            # SpringBoot 실행 포트
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ykk-config
+                  key: DB_HOST                # MySQL Service 주소
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ykk-config
+                  key: DB_PORT                # MySQL 포트
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ykk-config
+                  key: DB_NAME                # DB 이름
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_USER             # DB 사용자 계정
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_PASSWORD          # DB 비밀번호
