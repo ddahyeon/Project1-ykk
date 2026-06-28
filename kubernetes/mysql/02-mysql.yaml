@@ -1,18 +1,6 @@
 # 02-mysql.yaml
 
 apiVersion: v1
-kind: Secret
-metadata:
-  name: mysql-secret
-  namespace: ykk
-type: Opaque
-stringData:
-  MYSQL_ROOT_PASSWORD: "1234"   # MySQL root 계정 비밀번호
-  MYSQL_USER: "ykkuser"         # Backend에서 사용할 계정 DB 계정
-  MYSQL_PASSWORD: "ykk123"      # Backend에서 사용할 DB 비밀번호
-
----
-apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: mysql-pv-node1
