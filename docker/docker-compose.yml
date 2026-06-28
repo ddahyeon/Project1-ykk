@@ -1,0 +1,38 @@
+networks:
+  project-network:
+
+volumes:
+  mysql-data:
+
+services:
+  mysql:
+    image: mysql:8.3
+    container_name: mysql-data5
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: testdb
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - project-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p6120" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+      start_interval: 5s
+
+  backend:
+   build:
+    context: .
+    dockerfile: Dockerfile
+   image: project-image
+   container_name: project-container
+   ports:
+    - "8080:8080"
+   depends_on:
+     mysql:
+       condition: service_healthy
+   networks:
+    - project-network
