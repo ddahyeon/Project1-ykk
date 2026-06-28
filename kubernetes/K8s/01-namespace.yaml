@@ -3,4 +3,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ykk
+  name: ykk  # ykk 프로젝트 전용 namespace

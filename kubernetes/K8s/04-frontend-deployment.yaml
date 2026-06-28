@@ -8,18 +8,18 @@ metadata:
   labels:
     app: ykk-frontend
 spec:
-  replicas: 1
+  replicas: 1                   # 테스트 환경이어서 Frontend Pod 1개 실행으로 설정했습니다.
   selector:
     matchLabels:
-      app: ykk-frontend
+      app: ykk-frontend         # 관리할 Pod 라벨 선택
   template:
     metadata:
       labels:
-        app: ykk-frontend
+        app: ykk-frontend       # Service가 찾을 Pod 라벨
     spec:
       containers:
         - name: frontend
-          image: nginx:latest # 이미지 기입
+          image: nginx:latest   # 이미지 기입
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 80
+            - containerPort: 80  # Frontend 컨테이너 실행 포트

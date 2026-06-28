@@ -7,8 +7,8 @@ metadata:
   namespace: ykk
 spec:
   selector:
-    app: ykk-backend
+    app: ykk-backend           # Backend Pod와 연결
   ports:
-    - port: 8080
-      targetPort: 8080
-  type: ClusterIP
+    - port: 8080               # Service 포트
+      targetPort: 8080         # SpringBoot 컨테이너 포트
+  type: ClusterIP              # 외부에 공개하지 않는 내부 Service

@@ -8,44 +8,44 @@ metadata:
   labels:
   app: ykk-backend
 spec:
-  replicas: 1
+  replicas: 1                  # 테스트 환경으로 Backend Pod 1개 실행으로 설정했습니다.
   selector:
-    matchLabels:               # 해당하는 Label과 일치하는 Pod를 선택함
+    matchLabels:               
       app: ykk-backend
   template:
     metadata:
-      labels:                   # Deployment라서 pod를 자동으로 생성함 여기 있는 Label을 Pod에 붙여줌 
+      labels:                    
         app: ykk-backend
     spec:
       containers:
         - name: ykk-backend
           image: ori268/todo-springboot:1.0  # 이미지 가져와야 됨
-          imagePullPolicy: IfNotPresent              # 이미 이미지가 있으면 그대로 쓰고, 없으면 Docker Hub에서 다운로드함
+          imagePullPolicy: IfNotPresent              
           ports:
-            - containerPort: 8080
+            - containerPort: 8080            # SpringBoot 실행 포트
           env:
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
                   name: ykk-config
-                  key: DB_HOST
+                  key: DB_HOST                # MySQL Service 주소
             - name: DB_PORT
               valueFrom:
                 configMapKeyRef:
                   name: ykk-config
-                  key: DB_PORT
+                  key: DB_PORT                # MySQL 포트
             - name: DB_NAME
               valueFrom:
                 configMapKeyRef:
                   name: ykk-config
-                  key: DB_NAME
+                  key: DB_NAME                # DB 이름
             - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
-                  key: MYSQL_USER
+                  key: MYSQL_USER             # DB 사용자 계정
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
-                  key: MYSQL_PASSWORD
+                  key: MYSQL_PASSWORD          # DB 비밀번호
