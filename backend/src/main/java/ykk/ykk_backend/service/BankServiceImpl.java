@@ -38,7 +38,6 @@ public class BankServiceImpl implements BankService{
 
         return accountEntityList.stream()
                 .map(account -> new ResAccount(
-                        account.getUserid(),
                         account.getAccountnum(),
                         account.getSavingtype(),
                         account.getInterest(),
@@ -61,7 +60,7 @@ public class BankServiceImpl implements BankService{
         DepositEntity deposit = DepositEntity.builder()
                 .accountnum(account.getAccountnum())
                 .iotype(DepositType.DEPOSIT)
-                .savingtype(SavingType.DEFAULT)
+                .savingtype(dto.getSavingtype())
                 .amount(dto.getAmount())
                 .build();
 
