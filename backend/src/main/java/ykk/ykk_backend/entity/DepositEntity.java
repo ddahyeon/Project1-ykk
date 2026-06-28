@@ -20,7 +20,7 @@ public class DepositEntity {
 
     // 회원 아이디
     @Column(nullable = false)
-    private String userid;
+    private String accountnum;
 
     // 0 : 입금, 1 : 출금
     @Column(nullable = false)

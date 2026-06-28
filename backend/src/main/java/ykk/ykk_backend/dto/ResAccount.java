@@ -10,5 +10,6 @@ public class ResAccount {
     private String userid;
     private String account;
     private SavingType savingtype;
+    private int interest;
     private int amount;
 }

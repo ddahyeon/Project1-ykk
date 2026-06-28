@@ -38,6 +38,8 @@ public class UserServiceImpl implements UserService{
                 .userid(reqSignup.getUserid())
                 .accountnum(CustomUtil.GenerateAccountNumber())
                 .savingtype(SavingType.DEFAULT)
+                .interest(0)
+                .interestrate(0)
                 .amount(0)
                 .build();
 

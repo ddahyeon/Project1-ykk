@@ -27,6 +27,12 @@ public class AccountEntity {
     @Column(nullable = false)
     private SavingType savingtype;
 
+    @Column(nullable = false)
+    private int interest;
+
+    @Column(nullable = false)
+    private int interestrate;
+
     // 금액
     @Column(nullable = false)
     private int amount;

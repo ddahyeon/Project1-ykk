@@ -9,7 +9,7 @@ create table if not exists user(
 
 CREATE TABLE IF NOT EXISTS depositlog (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    userid VARCHAR(255) NOT NULL,
+    accountnum VARCHAR(255) NOT NULL,
     iotype TINYINT NOT NULL,
     savingtype TINYINT NOT NULL,
     amount INT NOT NULL
@@ -20,5 +20,7 @@ create table if not exists account(
     accountnum VARCHAR(255) NOT NULL,
     userid VARCHAR(255) NOT NULL,
     savingtype TINYINT NOT NULL,
+    interest INT NOT NULL,
+    interestrate INT NOT NULL,
     amount INT NOT NULL
 );

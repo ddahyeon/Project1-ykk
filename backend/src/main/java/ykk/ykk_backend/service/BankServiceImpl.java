@@ -1,7 +1,10 @@
 package ykk.ykk_backend.service;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ykk.ykk_backend.common.CustomUtil;
 import ykk.ykk_backend.common.DepositType;
 import ykk.ykk_backend.common.ExternalAPI;
@@ -38,6 +41,7 @@ public class BankServiceImpl implements BankService{
                         account.getUserid(),
                         account.getAccountnum(),
                         account.getSavingtype(),
+                        account.getInterest(),
                         account.getAmount()))
                 .toList();
     }
@@ -54,7 +58,7 @@ public class BankServiceImpl implements BankService{
 
         // 입출금 내역 생성
         DepositEntity deposit = DepositEntity.builder()
-                .userid(dto.getUserid())
+                .accountnum(account.getAccountnum())
                 .iotype(DepositType.DEPOSIT)
                 .savingtype(SavingType.DEFAULT)
                 .amount(dto.getAmount())
@@ -78,7 +82,7 @@ public class BankServiceImpl implements BankService{
 
         // 입출금 내역 생성
         DepositEntity deposit = DepositEntity.builder()
-                .userid(dto.getUserid())
+                .accountnum(account.getAccountnum())
                 .iotype(DepositType.WITHDRAW)
                 .savingtype(SavingType.DEFAULT)
                 .amount(dto.getAmount())
@@ -91,15 +95,25 @@ public class BankServiceImpl implements BankService{
 
     @Override
     public void RegistGoods(ReqRegist dto) {
+        int interestrate = switch (dto.getType()) {
+            case SavingType.NORMAL -> 200;
+            case SavingType.DOLLAR -> 100;
+            case SavingType.COMPOUND -> 50;
+            case SavingType.YOUTH -> 500;
+            default -> 0;
+        };
+
         AccountEntity accountEntity = AccountEntity.builder()
                 .accountnum(CustomUtil.GenerateAccountNumber())
                 .userid(dto.getUserid())
                 .savingtype(dto.getType())
+                .interest(0)
+                .interestrate(interestrate)
                 .amount(dto.getInitdeposit())
                 .build();
 
         DepositEntity depositEntity = DepositEntity.builder()
-                .userid(dto.getUserid())
+                .accountnum(accountEntity.getAccountnum())
                 .iotype(DepositType.REGISTRY)
                 .savingtype(dto.getType())
                 .amount(dto.getInitdeposit())
@@ -111,12 +125,14 @@ public class BankServiceImpl implements BankService{
             accountEntity.setAmount((int)money * 1000);
         }
 
-
-
-
         accountRepository.save(accountEntity);
         depositRepository.save(depositEntity);
     }
 
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    @Transactional
+    public void UpdateInterest(){
+        accountRepository.updateInterestAll();
+    }
 
 }

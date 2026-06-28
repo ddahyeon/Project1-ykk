@@ -9,7 +9,7 @@ public class HomeController {
     @GetMapping("/")
     public ResAPI home(){
         System.out.println("API Request /");
-        return new ResAPI("Hello World!");
+        return new ResAPI("Hello World2!");
     }
 
 }
