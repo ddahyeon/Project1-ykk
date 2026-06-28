@@ -1,4 +1,4 @@
-# 01-namespace.yaml
+# namespace.yaml
 
 apiVersion: v1
 kind: Namespace

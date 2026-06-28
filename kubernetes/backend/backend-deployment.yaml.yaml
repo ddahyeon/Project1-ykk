@@ -1,4 +1,4 @@
-# 06-backend-deployment.yaml
+# backend-deployment.yaml
 
 apiVersion: apps/v1
 kind: Deployment
