@@ -1,0 +1,36 @@
+services:
+  mysql:
+    image: mysql:8.3
+    container_name: ykk-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: testdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - ykk-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ykk-backend:v1
+    container_name: ykk-backend
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/testdb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      DB_USERNAME: root
+      DB_PASSWORD: 1234
+    depends_on:
+      - mysql
+    networks:
+      - ykk-net
+
+volumes:
+  mysql-data:
+
+networks:
+  ykk-net:
