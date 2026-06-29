@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+ <!-- errorPage 보여주기-->
+  <div th:fragment="content">
+  <p th:if="${param.error}">
+      아이디 또는 비밀번호 다시 확인하세요
+  </p>
+ <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+    <form  th:action="@{/auth}" method="post">
+        아이디:<input type="text" name="userid"><br>
+        비밀번호:<input type="text" name="password"><br>
+      <input type="submit" value="로그인">
+    </form>
+  </div>
+</body>
+</html>

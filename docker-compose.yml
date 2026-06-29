@@ -14,9 +14,8 @@ services:
 
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
-#    image: tak47onejoon/ykk_backend
     image: dahyeoni/ykk-backend:v1
     container_name: ykk-backend
     ports:
@@ -27,6 +26,24 @@ services:
       DB_PASSWORD: 1234
     depends_on:
       - mysql
+    networks:
+      - ykk-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: dahyeoni/ykk-frontend:v1
+    container_name: ykk-frontend
+    ports:
+      - "3000:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/testdb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      DB_USERNAME: root
+      DB_PASSWORD: 1234
+    depends_on:
+      - mysql
+      - backend
     networks:
       - ykk-net
 

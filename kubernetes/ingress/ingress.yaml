@@ -1,0 +1,26 @@
+# ingress.yaml
+
+# VMware/kubeadm 환경에서는 baremetal용 NGINX Ingress Controller 설치
+# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/baremetal/deploy.yaml
+
+# C:\Windows\System32\drivers\etc\hosts 파일에
+# 172.16.8.10 ykk.local 작성
+
+apiVersion: networking.k8s.io/v1  
+kind: Ingress                    
+metadata:
+  name: ykk-ingress
+  namespace: ykk          
+spec:
+  ingressClassName: nginx
+  rules:                         
+  - host: ykk.local
+    http:                         
+      paths:
+      - path: /           
+        pathType: Prefix              
+        backend:
+          service:                
+            name: ykk-backend-service                 
+            port:
+              number: 8080          
