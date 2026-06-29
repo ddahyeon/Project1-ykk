@@ -6,7 +6,7 @@ metadata:
   name: ykk-backend
   namespace: ykk
   labels:
-  app: ykk-backend
+    app: ykk-backend
 spec:
   replicas: 1                  # 테스트 환경으로 Backend Pod 1개 실행으로 설정했습니다.
   selector:
@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: ykk-backend
-          image: ori268/todo-springboot:1.0  # 이미지 가져와야 됨
-          imagePullPolicy: IfNotPresent              
+          image: dahyeoni/ykk-backend:v1    
+          imagePullPolicy: Always              
           ports:
             - containerPort: 8080            # SpringBoot 실행 포트
           env:

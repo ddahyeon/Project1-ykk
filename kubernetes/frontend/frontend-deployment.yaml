@@ -20,6 +20,6 @@ spec:
       containers:
         - name: frontend
           image: nginx:latest   # 이미지 기입
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80  # Frontend 컨테이너 실행 포트

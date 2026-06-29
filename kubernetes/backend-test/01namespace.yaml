@@ -1,0 +1,6 @@
+# 01-namespace.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ykk  # ykk 프로젝트 전용 namespace
