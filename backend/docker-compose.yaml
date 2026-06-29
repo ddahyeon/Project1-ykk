@@ -16,7 +16,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: dahyeoni/ykk-backend:v1
+    image: tak47onejoon/ykk_backend
     container_name: ykk-backend
     ports:
       - "8080:8080"
