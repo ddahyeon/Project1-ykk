@@ -1,6 +1,5 @@
 package ykk.ykk_backend.service;
 
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,7 @@ import ykk.ykk_backend.repository.AccountRepository;
 import ykk.ykk_backend.repository.DepositRepository;
 import ykk.ykk_backend.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -36,14 +36,17 @@ public class BankServiceImpl implements BankService{
             throw new RuntimeException("계좌가 없습니다.");
         }
 
+
         return accountEntityList.stream()
                 .map(account -> new ResAccount(
                         account.getAccountnum(),
                         account.getSavingtype(),
                         account.getInterest(),
                         (float)account.getInterestrate()/100,
-                        account.getAmount()))
-                .toList();
+                        account.getAmount(),
+                        CalcTime(account.getStart_time()),
+                        CalcTime(account.getEnd_time())
+                        )).toList();
     }
 
     @Override
@@ -103,6 +106,9 @@ public class BankServiceImpl implements BankService{
             default -> 0;
         };
 
+        LocalDateTime now = LocalDateTime.now();
+        int cur = (now.getHour() * 60) + now.getMinute();
+
         AccountEntity accountEntity = AccountEntity.builder()
                 .accountnum(CustomUtil.GenerateAccountNumber())
                 .userid(dto.getUserid())
@@ -110,6 +116,8 @@ public class BankServiceImpl implements BankService{
                 .interest(0)
                 .interestrate(interestrate)
                 .amount(dto.getInitdeposit())
+                .start_time(cur)
+                .end_time(cur+dto.getPeriod()*2)
                 .build();
 
         DepositEntity depositEntity = DepositEntity.builder()
@@ -129,10 +137,25 @@ public class BankServiceImpl implements BankService{
         depositRepository.save(depositEntity);
     }
 
-    @Scheduled(fixedDelay = 5 * 60 * 1000)
+//    @Scheduled(fixedDelay = 5 * 60 * 1000)
+//    @Transactional
+//    public void UpdateInterest(){
+//        accountRepository.updateInterestAll();
+//    }
+    @Scheduled(fixedDelay = 60 * 1000)
     @Transactional
-    public void UpdateInterest(){
-        accountRepository.updateInterestAll();
+    public void processAccount() {
+
+        accountRepository.updateInterest();   // 이자 지급
+
+        accountRepository.transferExpired(ExternalAPI.GetDollorPrice());  // 이관
+        accountRepository.deleteExpired();     // 삭제
+    }
+
+    private String CalcTime(int time){
+        int hour = time/ 60;
+        int minute = time%60;
+        return String.format("%02d:%02d", hour, minute);
     }
 
 }

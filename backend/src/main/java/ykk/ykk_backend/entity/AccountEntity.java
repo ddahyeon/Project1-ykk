@@ -36,4 +36,14 @@ public class AccountEntity {
     // 금액
     @Column(nullable = false)
     private int amount;
+
+    // 가입 시간
+    @Column(nullable = false)
+    private int start_time;
+
+    // 만기 시간
+    @Column(nullable = false)
+    private int end_time;
+
+
 }

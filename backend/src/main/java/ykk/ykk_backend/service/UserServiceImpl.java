@@ -13,6 +13,8 @@ import ykk.ykk_backend.entity.UserEntity;
 import ykk.ykk_backend.repository.AccountRepository;
 import ykk.ykk_backend.repository.UserRepository;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
@@ -28,6 +30,10 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public String signup(ReqSignup reqSignup) {
+
+        LocalDateTime now = LocalDateTime.now();
+        int cur = (now.getHour() * 60) + now.getMinute();
+
         UserEntity userEntity = new UserEntity(
                 reqSignup.getUserid(),
                 encoder.encode(reqSignup.getPassword()),
@@ -41,6 +47,8 @@ public class UserServiceImpl implements UserService{
                 .interest(0)
                 .interestrate(0)
                 .amount(0)
+                .start_time(cur)
+                .end_time(0)
                 .build();
 
 

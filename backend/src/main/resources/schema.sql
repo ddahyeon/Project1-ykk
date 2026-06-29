@@ -15,12 +15,14 @@ CREATE TABLE IF NOT EXISTS depositlog (
     amount INT NOT NULL
 );
 
-create table if not exists account(
+create table if not exists account (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     accountnum VARCHAR(255) NOT NULL,
     userid VARCHAR(255) NOT NULL,
     savingtype TINYINT NOT NULL,
     interest INT NOT NULL,
     interestrate INT NOT NULL,
-    amount INT NOT NULL
+    amount INT NOT NULL,
+    start_time INT NOT NULL,
+    end_time INT NOT NULL
 );

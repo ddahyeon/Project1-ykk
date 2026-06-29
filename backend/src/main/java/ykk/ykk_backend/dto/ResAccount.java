@@ -12,4 +12,6 @@ public class ResAccount {
     private int interest;
     private float rate;
     private int amount;
+    private String start_time;
+    private String end_time;
 }

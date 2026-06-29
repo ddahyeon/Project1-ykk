@@ -16,4 +16,6 @@ public class ReqRegist {
     SavingType type;
     @NotNull
     int initdeposit;
+    @NotNull
+    int period;
 }
