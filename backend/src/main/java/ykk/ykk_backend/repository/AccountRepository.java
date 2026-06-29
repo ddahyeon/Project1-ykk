@@ -36,9 +36,9 @@ public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
     @Query(value = """ 
     UPDATE account
     SET
-        interest = interest + (amount * interestrate) / 10000,
+        interest = interest + (amount * interestrate/ 12 ) / 10000,
             amount = CASE
-            WHEN savingtype = 3 THEN amount + (amount * interestrate) / 10000
+            WHEN savingtype = 3 THEN amount + (amount * interestrate/12) / 10000
             ELSE amount
     END
     WHERE

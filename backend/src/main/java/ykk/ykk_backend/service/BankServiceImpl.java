@@ -106,6 +106,14 @@ public class BankServiceImpl implements BankService{
             default -> 0;
         };
 
+        interestrate += switch (dto.getPeriod()){
+            case 6 -> 0;
+            case 12 -> 60;
+            case 18 -> 100;
+            case 24 -> 150;
+            default -> 0;
+        };
+
         LocalDateTime now = LocalDateTime.now();
         int cur = (now.getHour() * 60) + now.getMinute();
 
