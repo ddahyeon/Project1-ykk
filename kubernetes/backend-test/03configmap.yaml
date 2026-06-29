@@ -1,0 +1,11 @@
+# 03-configmap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ykk-config
+  namespace: ykk
+data:
+  DB_HOST: "mysql-service"     # Backend가 접속할 MySQL Service 이름
+  DB_PORT: "3306"              # MySQL 기본 포트
+  DB_NAME: "ykkdb"             # 사용할 Database 이름
