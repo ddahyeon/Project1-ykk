@@ -1,0 +1,35 @@
+networks:
+  boot-mysql-net5:
+volumes:
+  mysql-data-volume5:
+services:
+  mysql:
+    image: mysql:8.3
+    container_name: mysql-data5
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: testdb
+    volumes:
+      - mysql-data-volume5:/var/lib/mysql
+    networks:
+      - boot-mysql-net5
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1234" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+      start_interval: 5s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spring-mysql-demo5
+    container_name: spring-mysql-demo5
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - boot-mysql-net5

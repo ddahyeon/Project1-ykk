@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>적금 가입 신청</title>
+</head>
+<body>
+<h1>적금 가입 신청서</h1>
+<form id="joinForm" onsubmit="executeJoin(event)">
+    <label>선택한 상품:</label>
+    <input type="text" id="productName" readonly><br><br>
+    <div id="dollarInfoArea" style="display: none; background-color: #f0f8ff; padding: 10px; margin-bottom: 20px;">
+        <strong>[외환 적금 전용] 실시간 달러 환율 💵</strong><br>
+        현재 1달러 = <span id="dollarRate" style="color: blue; font-weight: bold;">로딩 중...</span>
+    </div>
+    <label>출금 가능 잔액 (기본 계좌):</label>
+    <input type="text" id="availableBalance" readonly style="color: black; font-weight: bold;" value="잔액 조회 중..."><br><br>
+    <label>월 납입금 (원화 기준):</label>
+    <input type="number" id="initDeposit" required placeholder="가입 금액을 입력하세요"><br><br>
+    <div>
+        <label for="period">가입 기간</label>
+        <select id="period">
+            <option value="6">6개월</option>
+            <option value="12" selected>12개월</option>
+            <option value="24">24개월</option>
+        </select>
+    </div>
+    <div id="expectedAmountArea" style="margin-top: 10px; font-weight: bold; color: green;">
+        예상 만기 수령액: <span id="expectedAmount">0</span>
+    </div>
+    <button type="submit">최종 가입</button>
+    <button type="button" onclick="location.href='/products'">취소</button>
+</form>
+
+<script>
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const productType = urlParams.get('type');
+    const productName = urlParams.get('name');
+    const loginId = sessionStorage.getItem("loginId");
+
+    let maxAvailableBalance = 0;
+
+
+    document.addEventListener('DOMContentLoaded', init);
+
+
+    async function init() {
+        checkLoginStatus();
+
+        // 상품명 세팅
+        if (productName) {
+            document.getElementById('productName').value = productName;
+        }
+
+        // 기본 계좌 잔액 가져오기
+        await fetchBaseAccountBalance();
+
+        // 외환 적금(타입 2)인 경우 환율 정보 가져오기
+        if (productType === '2') {
+            await fetchExchangeRate();
+        }
+    }
+
+    function checkLoginStatus() {
+        if (!loginId) {
+            alert("로그인 정보가 없습니다. 다시 로그인해 주세요.");
+            window.location.href = "/";
+        }
+    }
+
+    //잔액&환율
+    async function fetchBaseAccountBalance() {
+        const balanceInput = document.getElementById('availableBalance');
+
+        try {
+            const response = await fetch("/api/bank/show", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userid: loginId })
+            });
+
+            const data = await response.json();
+            console.log("백엔드 응답 데이터:", data);
+
+            const accountList = Array.isArray(data) ? data : (data.list || data.accounts || [data]);
+            const generalAccount = accountList.find(acc => acc.savingtype === "DEFAULT");
+
+            if (generalAccount) {
+                maxAvailableBalance = generalAccount.amount;
+                balanceInput.value = `${maxAvailableBalance.toLocaleString()} 원`;
+            } else {
+                balanceInput.value = "0 원 (기본 계좌 찾기 실패)";
+            }
+        } catch (error) {
+            console.error("잔액 조회 실패:", error);
+            balanceInput.value = "잔액 정보 불러오기 실패";
+        }
+    }
+
+    async function fetchExchangeRate() {
+        const dollarInfoArea = document.getElementById('dollarInfoArea');
+        const dollarRateText = document.getElementById('dollarRate');
+
+        dollarInfoArea.style.display = 'block';
+
+        try {
+            const response = await fetch("/api/bank/dollar", { method: "GET" });
+            const data = await response.json();
+
+            if (data.dollar) {
+                dollarRateText.innerText = `${data.dollar.toLocaleString()} 원`;
+            } else {
+                dollarRateText.innerText = "환율 정보를 불러올 수 없습니다.";
+            }
+        } catch (error) {
+            console.error("환율 API 호출 에러:", error);
+            dollarRateText.innerText = "환율 서버 점검 중";
+        }
+    }
+
+// 1. 상품 번호별 이자율 동적 매핑 (백엔드 명세 기준)
+const interestRates = {
+    '1': 0.03, // 일반 적금 (3%)
+    '2': 0.04, // 외환 적금 (4%)
+    '3': 0.05, // 복리 적금 (5%)
+    '4': 0.06  // 청년 적금 (6%)
+};
+
+// 2. 실시간 계산 및 UI 반영 함수
+function calculateExpectedAmount() {
+    const depositInput = document.getElementById("initDeposit");
+    const periodSelect = document.getElementById("period");
+    const expectedAmountSpan = document.getElementById("expectedAmount");
+
+    if (!depositInput || !periodSelect || !expectedAmountSpan) return;
+
+    const P = parseInt(depositInput.value) || 0; // 매월 납입 금액 (원화)
+    const n = parseInt(periodSelect.value);      // 가입 기간 (개월 수)
+    const r = interestRates[productType] || 0.03; // 현재 상품의 이자율
+
+    if (P <= 0) {
+        expectedAmountSpan.innerText = productType === '2' ? "$0.00" : "0원";
+        return;
+    }
+
+    // 단리 만기 수령액 공식 적용
+    const totalKrw = (P * n) + (P * (n * (n + 1)) / 2 * (r / 12));
+
+    // 외환 적금(타입 2)일 경우 달러 변환 처리
+    if (productType === '2') {
+        // currentExchangeRate가 0이거나 없을 때를 대비한 안전장치
+        const rate = (typeof currentExchangeRate !== 'undefined' && currentExchangeRate > 0) ? currentExchangeRate : 1350;
+        const totalDollar = totalKrw / rate;
+
+        // 금융 스펙에 맞게 소수점 2자리와 달러 기호 부착
+        expectedAmountSpan.innerText = `$${totalDollar.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    } else {
+        // 일반 적금들은 원화 세 자리 콤마 표기
+        expectedAmountSpan.innerText = `${Math.floor(totalKrw).toLocaleString()}원`;
+    }
+}
+
+// 3. 이벤트 리스너 등록 (금액 입력시, 기간 변경시 실시간 반응)
+document.addEventListener("DOMContentLoaded", () => {
+    const depositInput = document.getElementById("initDeposit");
+    const periodSelect = document.getElementById("period");
+
+    if (depositInput) {
+        depositInput.addEventListener("input", calculateExpectedAmount);
+    }
+    if (periodSelect) {
+        periodSelect.addEventListener("change", calculateExpectedAmount);
+    }
+
+    // 외환 적금 환율 로딩 등 기존 init 로직이 끝난 후 초기 계산 1회 실행
+    setTimeout(calculateExpectedAmount, 500);
+});
+
+
+    //선출금-> 가입
+    async function executeJoin(event) {
+        event.preventDefault();
+
+        const depositAmount = parseInt(document.getElementById("initDeposit").value);
+
+        //가입 금액 유효성 체크
+        if (depositAmount <= 0) {
+            alert("입금액은 0원보다 커야 합니다.");
+            return;
+        }
+        if (depositAmount > maxAvailableBalance) {
+            alert(`기본 계좌의 잔액이 부족합니다! \n(현재 잔액: ${maxAvailableBalance.toLocaleString()}원)`);
+            return;
+        }
+
+        try {
+            //선출금
+            const withdrawResponse = await fetch("/api/bank/withdraw", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userid: loginId, amount: depositAmount })
+            });
+
+            if (!withdrawResponse.ok) {
+                alert("기본 계좌에서 가입 금액을 출금하는 데 실패했습니다. 다시 시도해 주세요.");
+                return;
+            }
+
+            // 적금 가입 요청
+            const registResponse = await fetch("/api/bank/regist", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userid: loginId,
+                    type: parseInt(productType),
+                    initdeposit: depositAmount
+                })
+            });
+
+            //결과
+            if (registResponse.ok) {
+                alert(`성공적으로 ${productName}에 가입되었습니다! 🎉\n(기본 계좌에서 ${depositAmount.toLocaleString()}원이 이동되었습니다.)`);
+                window.location.href = "/main";
+            } else {
+                alert("기본 계좌에서 출금은 완료되었으나, 적금 계좌 생성에 실패했습니다. 관리자에게 문의하세요.");
+            }
+
+        } catch (error) {
+            console.error("프로세스 진행 중 오류 발생:", error);
+            alert("서버 통신 중 오류가 발생했습니다.");
+        }
+    }
+</script>
+</body>
+</html>

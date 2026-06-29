@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>YKK 금융</title>
+    <script th:inline="javascript">
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const idValue = document.getElementById("userIdField").value;
+            const pwValue = document.getElementById("userPwField").value;
+
+            const loginData = {
+                userid: idValue,
+                password: pwValue
+            }
+            try {
+                // 백엔드 API 로그인 요청
+                const response = await fetch("/api/user/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(loginData)
+                });
+
+                // 응답 상태 검증
+                if (!response.ok) {
+                    throw new Error(`서버 응답 오류 (상태코드: ${response.status})`);
+                }
+
+                const data = await response.json();
+
+                // 로그인 성공 여부 판별
+                const isSuccessMessage = data?.message && (
+                    data.message.includes("성공") ||
+                    data.message.includes("success") ||
+                    data.message.includes("환영")
+                );
+
+                if (isSuccessMessage) {
+                    // 정상적인 성공 응답
+                    alert(data.message);
+                    sessionStorage.setItem("loginId", idValue);
+                    window.location.href = "/main";
+
+                } else if (data?.message) {
+                    // 서버에서 실패 메시지를 보낸 경우
+                    alert(`로그인 실패: ${data.message}`);
+
+                } else {
+                    // [예외 상황] message 필드가 없어도 임시로 성공 처리
+                    sessionStorage.setItem("loginId", idValue);
+                    window.location.href = "/main";
+                }
+
+            } catch (error) {
+                console.error("로그인 프로세스 에러:", error);
+                alert(`로그인에 실패했습니다. 아이디와 비밀번호를 확인해 주세요.\n(${error.message})`);
+            }
+        }
+    </script>
+<body>
+<h2>로그인</h2>
+<form onsubmit="handleLogin(event)">
+    <div>
+        <label for="userIdField">아이디: </label>
+        <input type="text" id="userIdField" placeholder="아이디 입력" required />
+    </div>
+    <div>
+        <label for="userPwField">비밀번호: </label>
+        <input type="password" id="userPwField" placeholder="비밀번호 입력" required />
+    </div>
+    <br>
+    <button type="submit">로그인</button>
+</form>
+<br>
+<a th:href="@{/signup}">회원가입하러 가기</a>
+</body>
+</html>
