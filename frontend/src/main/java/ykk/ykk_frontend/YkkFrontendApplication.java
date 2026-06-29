@@ -1,4 +1,4 @@
-package ykk.ykk_backend;
+package ykk.ykk_frontend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,11 +6,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class YkkBackendApplication {
+public class YkkFrontendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(YkkBackendApplication.class, args);
-        System.out.println("Backend API Server on!");
+        SpringApplication.run(YkkFrontendApplication.class, args);
+        System.out.println("Front Web Server on!");
     }
 
 }

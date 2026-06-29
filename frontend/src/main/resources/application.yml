@@ -1,18 +1,13 @@
 #spring.application.name=demo
+server:
+  port: 80
 
 spring:
   application:
     name: demo
+
   thymeleaf:
     cache: false
-  datasource:
-    url: ${DB_URL}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: update
 
   #schema.sql 과 data.sql 관리 가능 ( always|never )
   sql:
@@ -23,15 +18,4 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-        
-mybatis:
-  mapper-locations: com/exam/mapper/*.xml
-  type-aliases-package: com.exam.dto
-  configuration:
-    map-underscore-to-camel-case: true
-
-# 개발단계에서 SQL 확인
-logging:
-  level:
-    com.exam.mapper:  DEBUG
 

@@ -1,0 +1,38 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# Java
+*.class
+hs_err_pid*
+replay_pid*
+
+# Logs
+logs/
+*.log
+
+# Spring Boot
+*.pid
+*.seed
+
+# Environment
+.env
+.env.*
+!.env.example
+
+
+kube/
