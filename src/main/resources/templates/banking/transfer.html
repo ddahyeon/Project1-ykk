@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YYK - 입출금</title>
+
+</head>
+<body>
+<div class="transfer-container">
+    <h2>입출금</h2>
+
+    <div class="balance-box">
+        <div class="balance-title">현재 내 기본 계좌 잔액</div>
+        <div class="balance-amount" id="currentBalanceDisplay">조회 중...</div>
+    </div>
+
+    <form id="transferForm" onsubmit="executeTransfer(event)">
+
+        <div class="radio-group">
+            <label>
+                <input type="radio" name="transferType" value="deposit" checked> 입금
+            </label>
+            <label>
+                <input type="radio" name="transferType" value="withdraw"> 출금
+            </label>
+        </div>
+
+        <input type="number" id="amountField" placeholder="금액을 입력하세요" required min="1">
+
+        <button type="submit">실행하기</button>
+    </form>
+
+    <a href="/main" class="back-link">메인으로 돌아가기</a>
+</div>
+
+<script>
+
+
+
+    // 1. 페이지 로드 시 로그인 상태 체크
+    window.onload = function() {
+
+        loadCurrentBalance(loginId); //추가된 함수 실시간 잔액 조회 함수 호출
+    };
+
+    // 💡 [추가된 함수] 서버에서 기본 계좌 잔액을 불러와 화면에 뿌려주는 함수
+        function loadCurrentBalance(userId) {
+            fetch("/api/bank/show", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ userid: userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 내 전체 계좌 배열 중 savingtype이 0(기본 입출금 계좌)인 것을 매칭해 찾습니다.
+                const mainAccount = data.find(account => account.savingtype === 0);
+
+                if (mainAccount) {
+                    // 세 자릿수 콤마(,) 포맷팅을 적용해 화면에 꽂아줍니다!
+                    document.getElementById("currentBalanceDisplay").innerText = mainAccount.amount.toLocaleString() + " 원";
+                } else {
+                    document.getElementById("currentBalanceDisplay").innerText = "0 원 (계좌 없음)";
+                }
+            })
+            .catch(error => {
+                console.error("잔액 조회 중 실패:", error);
+                document.getElementById("currentBalanceDisplay").innerText = "조회 실패 😢";
+            });
+        }
+
+    // 2. 입출금 통합 실행 함수
+    function executeTransfer(event) {
+        // 브라우저 기본 전송(GET 새로고침) 완벽 차단! (405 에러 방지)
+        event.preventDefault();
+
+        // 값 가져오기
+        const amountValue = document.getElementById("amountField").value;
+        const loginId = sessionStorage.getItem("loginId");
+
+        // 체크된 라디오 버튼의 값(deposit 또는 withdraw) 가져오기
+        const transferType = document.querySelector('input[name="transferType"]:checked').value;
+
+        // 금액 검증 로직
+        if (!amountValue || parseInt(amountValue) <= 0) {
+            alert("올바른 금액을 입력해주세요.");
+            return;
+        }
+
+        // 백엔드로 보낼 JSON 데이터 포장
+        const requestData = {
+            userid: loginId,
+            amount: parseInt(amountValue, 10),
+            savingtype: 0
+        };
+
+        // 선택된 타입에 따라 통신할 API URL을 결정합니다.
+        let apiUrl = "";
+        let successMessage = "";
+
+        if (transferType === "deposit") {
+            apiUrl = "/api/bank/deposit"; // 백엔드의 입금 URL
+            successMessage = "성공적으로 입금되었습니다! ";
+        } else if (transferType === "withdraw") {
+            apiUrl = "/api/bank/withdraw"; // 백엔드의 출금 URL (명세서에 맞게 확인해주세요)
+            successMessage = "성공적으로 출금되었습니다! ";
+        }
+
+        console.log(`🚀 ${transferType} 요청 전송 -> URL: ${apiUrl}`, requestData);
+
+        // fetch로 POST 통신 시작
+        fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => {
+            if (response.ok) {
+                alert(successMessage);
+                window.location.href = "/main"; // 완료 후 메인 대시보드로 복귀
+            } else {
+                alert("요청 실패! 잔액이 부족하거나 서버 에러입니다. 상태 코드: " + response.status);
+            }
+        })
+        .catch(error => {
+            console.error("통신 에러 발생:", error);
+            alert("서버 통신 중 에러가 발생했습니다.");
+        });
+    }
+</script>
+</body>
+</html>

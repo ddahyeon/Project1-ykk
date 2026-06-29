@@ -1,0 +1,37 @@
+#spring.application.name=demo
+
+spring:
+  application:
+    name: demo
+  thymeleaf:
+    cache: false
+  datasource:
+    url: jdbc:mysql://localhost:3306/testdb
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+  jpa:
+    hibernate:
+      ddl-auto=update:
+
+  #schema.sql 과 data.sql 관리 가능 ( always|never )
+  sql:
+    init:
+      mode: never
+
+  # /ccc/**/ddd 사용시 ** 허용
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+        
+mybatis:
+  mapper-locations: com/exam/mapper/*.xml
+  type-aliases-package: com.exam.dto
+  configuration:
+    map-underscore-to-camel-case: true
+
+# 개발단계에서 SQL 확인
+logging:
+  level:
+    com.exam.mapper:  DEBUG
+

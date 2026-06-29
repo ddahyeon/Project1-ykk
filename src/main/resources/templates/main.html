@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>메인 대시보드</title>
+</head>
+<body>
+<div>
+    <h2><span id="usernameHeader">사용자</span>님 환영합니다!</h2>
+    <form th:action="@{/logout}" method="post" style="display:inline;">
+        <button type="submit" onclick="sessionStorage.removeItem('loginId');">로그아웃</button>
+    </form>
+</div>
+<hr>
+<div>
+    <h3>총 자산: <span id="totalAsset">0</span> 원</h3>
+</div>
+<hr>
+<div>
+    <h4> 내 계좌</h4>
+    <ul>
+        <li>
+            기본 입출금 계좌 : <span id="mainBalance">0</span> 원
+            <a th:href="@{/banking/transfer}">[입출금 하기]</a>
+        </li>
+    </ul>
+    <h4> 내 적금</h4>
+    <p id="noSavingMessage" class="no-data">가입된 적금 상품이 없습니다.</p>
+    <ul id="savingList" style="display: none;">
+        <li id="saving1Item" style="display: none;">일반 적금 : <span id="saving1Balance">0</span> 원</li>
+        <li id="saving2Item" style="display: none;">외환 적금 : <span id="saving2Balance">0</span></li>
+        <li id="saving3Item" style="display: none;">복리 적금 : <span id="saving3Balance">0</span> 원</li>
+        <li id="saving4Item" style="display: none;">청년 적금 : <span id="saving4Balance">0</span> 원</li>
+    </ul>
+</div>
+<hr>
+<div>
+    <a th:href="@{/products}">👉 [새로운 적금 상품 구경하기]</a>
+</div>
+
+
+<script>
+    window.onload = function() {
+        const loginId = sessionStorage.getItem("loginId");
+
+        if (!loginId) {
+            alert("로그인이 필요한 서비스입니다.");
+            window.location.href = "/";
+            return;
+        }
+        const usernameHeader = document.getElementById("usernameHeader");
+        if (usernameHeader) {
+            usernameHeader.innerText = loginId;
+        }
+        fetchAccountData(loginId);
+    };
+
+    // 백엔드 API 연동 및 데이터 화면 출력 함수
+    function fetchAccountData(userId) {
+        fetch("/api/bank/show", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userid: userId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            let totalAmount = 0;
+            let hasSaving = false; // 적금 가입 여부를 체크할 플래그 변수 변수 🚩
+
+            console.log("서버가 준 전체 계좌 데이터:", data);
+               //각 계좌 누적용 변수
+               let mainTotal = 0;
+               let normalTotal = 0;
+               let dollarTotal = 0;
+               let compoundTotal = 0;
+               let youthTotal = 0;
+            data.forEach(account => {
+                totalAmount += account.amount; // 총 자산 누적 합산
+
+                // 1. 입출금 계좌 ("DEFAULT")
+                if (account.savingtype === "DEFAULT" || account.savingtype === 0) {
+                    mainTotal += account.amount;
+                }
+                // [2] 일반 적금 ("NORMAL")
+                else if (account.savingtype === "NORMAL" || account.savingtype === 1) {
+                    hasSaving = true;
+                    document.getElementById("saving1Item").style.display = "list-item";
+                    normalTotal += account.amount;
+                }
+                // [3] 외환 적금 ("DOLLAR")
+                else if (account.savingtype === "DOLLAR" || account.savingtype === 2) {
+                    hasSaving = true;
+                    document.getElementById("saving2Item").style.display = "list-item";
+                    dollarTotal += account.amount;
+                }
+                // [4] 복리 적금 ("COMPOUND")
+                else if (account.savingtype === "COMPOUND" || account.savingtype === 3) {
+                    hasSaving = true;
+                    document.getElementById("saving3Item").style.display = "list-item";
+                    compoundTotal += account.amount;
+                }
+                // [5] 청년 적금 ("YOUTH")
+                else if (account.savingtype === "YOUTH" || account.savingtype === 4) {
+                    hasSaving = true;
+                    document.getElementById("saving4Item").style.display = "list-item";
+                    youthTotal += account.amount;
+                }
+            });
+            //합산 출력
+            const mainBal = document.getElementById("mainBalance");
+            if (mainBal) mainBal.innerText = mainTotal.toLocaleString();
+            document.getElementById("saving1Balance").innerText = normalTotal.toLocaleString();
+            const usdAmount = dollarTotal / 1000;
+            document.getElementById("saving2Balance").innerText = "$" + usdAmount.toLocaleString('en-US', { maximumFractionDigits: 2 });
+            document.getElementById("saving3Balance").innerText = compoundTotal.toLocaleString();
+            document.getElementById("saving4Balance").innerText = youthTotal.toLocaleString();
+
+            //적금 존재 여부
+            const noSavingMessage = document.getElementById("noSavingMessage");
+            const savingList = document.getElementById("savingList");
+
+            if (hasSaving) {
+                noSavingMessage.style.display = "none"; // "가입된 상품이 없습니다" 숨기기
+                savingList.style.display = "block";     // 적금 리스트 보이기
+            } else {
+                noSavingMessage.style.display = "block"; // "가입된 상품이 없습니다" 보이기
+                savingList.style.display = "none";      // 적금 리스트 숨기기
+            }
+            // 계산된 총 자산 화면에 반영
+            const totalAsset = document.getElementById("totalAsset");
+            if (totalAsset) totalAsset.innerText = totalAmount.toLocaleString();
+        })
+        .catch(error => {
+            console.error("계좌 데이터를 불러오는 중 에러 발생:", error);
+        });
+    }
+</script>
+</body>
+</html>

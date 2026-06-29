@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 페이지</title>
+</head>
+<script>
+</script>
+<body>
+<h1>멋쟁이사자 뱅크 - 적금 상품 목록</h1>
+<p>원하시는 금융 상품을 선택해 주세요!</p>
+<ul>
+    <li>
+        <strong>일반 적금</strong> - 꾸준한 저축의 기본!
+        <button onclick="location.href='/join-product?type=1&name=일반 적금'">가입하기</button>
+    </li>
+    <li>
+        <strong>외환 적금</strong> - 달러 투자의 첫걸음입니다
+        <button onclick="location.href='/join-product?type=2&name=외환 적금'">가입하기</button>
+    </li>
+    <li>
+        <strong>복리 적금</strong> - 이자에 이자가 붙는 마법의 스노우볼!
+        <button onclick="location.href='/join-product?type=3&name=복리 적금'">가입하기</button>
+    </li>
+    <li>
+        <strong>청년 적금</strong> - 청년들의 든든한 목돈 마련을 위한 특별 우대 금리!
+        <button onclick="location.href='/join-product?type=4&name=청년 적금'">가입하기</button>
+    </li>
+</ul>
+<br>
+<button onclick="location.href='/main'">메인 대시보드로 돌아가기</button>
+</body>
+</html>
