@@ -51,26 +51,57 @@ public class BankServiceImpl implements BankService{
 
     @Override
     public void Deposit(ReqDeposit dto) {
-        // 계좌 조회
-        AccountEntity account = accountRepository
-                .findByUseridAndSavingtype(dto.getUserid(), SavingType.DEFAULT)
-                .orElseThrow(() -> new RuntimeException("사용자가 없습니다."));
+        if(dto.getSavingtype() == SavingType.DEFAULT){
+            // 계좌 조회
+            AccountEntity account = accountRepository
+                    .findByUseridAndSavingtype(dto.getUserid(), SavingType.DEFAULT)
+                    .orElseThrow(() -> new RuntimeException("사용자가 없습니다."));
+            // 잔액 증가
+            account.setAmount(account.getAmount() + dto.getAmount());
+            // 입출금 내역 생성
+            DepositEntity deposit = DepositEntity.builder()
+                    .accountnum(account.getAccountnum())
+                    .iotype(DepositType.DEPOSIT)
+                    .savingtype(dto.getSavingtype())
+                    .amount(dto.getAmount())
+                    .build();
+            // 저장
+            accountRepository.save(account);
+            depositRepository.save(deposit);
 
-        // 잔액 증가
-        account.setAmount(account.getAmount() + dto.getAmount());
+        }
+        else{
+            AccountEntity defaultaccount = accountRepository
+                    .findByUseridAndSavingtype(dto.getUserid(), SavingType.DEFAULT)
+                    .orElseThrow(() -> new RuntimeException("사용자가 없습니다."));
 
-        // 입출금 내역 생성
-        DepositEntity deposit = DepositEntity.builder()
-                .accountnum(account.getAccountnum())
-                .iotype(DepositType.DEPOSIT)
-                .savingtype(dto.getSavingtype())
-                .amount(dto.getAmount())
-                .build();
+            // 입출금 내역 생성
+            DepositEntity deposit1 = DepositEntity.builder()
+                    .accountnum(defaultaccount.getAccountnum())
+                    .iotype(DepositType.DEPOSIT)
+                    .savingtype(SavingType.DEFAULT)
+                    .amount(dto.getAmount())
+                    .build();
 
+            defaultaccount.setAmount(defaultaccount.getAmount() - dto.getAmount());
+            AccountEntity targetaccount = accountRepository
+                    .findByUseridAndSavingtype(dto.getUserid(), dto.getSavingtype())
+                    .orElseThrow(() -> new RuntimeException("가입된 상품이 아닙니다."));
+            targetaccount.setAmount(targetaccount.getAmount() + dto.getAmount());
 
-        // 저장
-        accountRepository.save(account);
-        depositRepository.save(deposit);
+            // 입출금 내역 생성
+            DepositEntity deposit2 = DepositEntity.builder()
+                    .accountnum(targetaccount.getAccountnum())
+                    .iotype(DepositType.WITHDRAW)
+                    .savingtype(dto.getSavingtype())
+                    .amount(dto.getAmount())
+                    .build();
+
+            accountRepository.save(defaultaccount);
+            depositRepository.save(deposit1);
+            accountRepository.save(targetaccount);
+            depositRepository.save(deposit2);
+        }
     }
 
     @Override
@@ -116,6 +147,20 @@ public class BankServiceImpl implements BankService{
 
         LocalDateTime now = LocalDateTime.now();
         int cur = (now.getHour() * 60) + now.getMinute();
+
+        AccountEntity defaultaccount = accountRepository
+                .findByUseridAndSavingtype(dto.getUserid(), SavingType.DEFAULT)
+                .orElseThrow(() -> new RuntimeException("사용자가 없습니다."));
+
+        defaultaccount.setAmount(defaultaccount.getAmount() - dto.getInitdeposit());
+        DepositEntity defaultDeposit = DepositEntity.builder()
+                .accountnum(defaultaccount.getAccountnum())
+                .iotype(DepositType.WITHDRAW)
+                .savingtype(SavingType.DEFAULT)
+                .amount(dto.getInitdeposit())
+                .build();
+
+
 
         AccountEntity accountEntity = AccountEntity.builder()
                 .accountnum(CustomUtil.GenerateAccountNumber())
