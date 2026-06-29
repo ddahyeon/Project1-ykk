@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YKK 금융관리</title>
+</head>
+<body>
+  <div th:fragment="content">
+      <!-- 인증 안된 경우 -->
+      <span sec:authorize="isAnonymous()">
+    로그인 해주세요
+   </span>
+      <!-- 인증 된 경우 -->
+      <span sec:authorize="isAuthenticated()">
+        메인 페이지<br>
+
+          <div>
+        <h3>계좌 잔액 (입출금 계좌)</h3>
+        <p>
+            잔액: <span th:text="${#numbers.formatInteger(mainAccountBalance, 3, 'COMMA')}"></span> 원
+            <a th:href="@{/banking/deposit}">[입출금 하기]</a>
+
+            <a th:href="@{/banking/deposit}">[입금]</a>
+            <a th:href="@{/banking/withdraw}">[출금]</a>
+        </p>
+    </div>
+
+          적금별 금액:
+
+          <a th:href="@{/productPage}">금융 상품 보러가기</a><br>
+          <a th:href="@{/todo-list}">상품 설명</a>
+      </span>
+
+  </div>
+</body>
+</html>
+

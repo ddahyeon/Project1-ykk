@@ -15,8 +15,19 @@
     </div>
     <label>출금 가능 잔액 (기본 계좌):</label>
     <input type="text" id="availableBalance" readonly style="color: black; font-weight: bold;" value="잔액 조회 중..."><br><br>
-    <label>최초 입금액 (원화 기준):</label>
+    <label>월 납입금 (원화 기준):</label>
     <input type="number" id="initDeposit" required placeholder="가입 금액을 입력하세요"><br><br>
+    <div>
+        <label for="period">가입 기간</label>
+        <select id="period">
+            <option value="6">6개월</option>
+            <option value="12" selected>12개월</option>
+            <option value="24">24개월</option>
+        </select>
+    </div>
+    <div id="expectedAmountArea" style="margin-top: 10px; font-weight: bold; color: green;">
+        예상 만기 수령액: <span id="expectedAmount">0</span>
+    </div>
     <button type="submit">최종 가입</button>
     <button type="button" onclick="location.href='/products'">취소</button>
 </form>
@@ -107,6 +118,65 @@
             dollarRateText.innerText = "환율 서버 점검 중";
         }
     }
+
+// 1. 상품 번호별 이자율 동적 매핑 (백엔드 명세 기준)
+const interestRates = {
+    '1': 0.03, // 일반 적금 (3%)
+    '2': 0.04, // 외환 적금 (4%)
+    '3': 0.05, // 복리 적금 (5%)
+    '4': 0.06  // 청년 적금 (6%)
+};
+
+// 2. 실시간 계산 및 UI 반영 함수
+function calculateExpectedAmount() {
+    const depositInput = document.getElementById("initDeposit");
+    const periodSelect = document.getElementById("period");
+    const expectedAmountSpan = document.getElementById("expectedAmount");
+
+    if (!depositInput || !periodSelect || !expectedAmountSpan) return;
+
+    const P = parseInt(depositInput.value) || 0; // 매월 납입 금액 (원화)
+    const n = parseInt(periodSelect.value);      // 가입 기간 (개월 수)
+    const r = interestRates[productType] || 0.03; // 현재 상품의 이자율
+
+    if (P <= 0) {
+        expectedAmountSpan.innerText = productType === '2' ? "$0.00" : "0원";
+        return;
+    }
+
+    // 단리 만기 수령액 공식 적용
+    const totalKrw = (P * n) + (P * (n * (n + 1)) / 2 * (r / 12));
+
+    // 외환 적금(타입 2)일 경우 달러 변환 처리
+    if (productType === '2') {
+        // currentExchangeRate가 0이거나 없을 때를 대비한 안전장치
+        const rate = (typeof currentExchangeRate !== 'undefined' && currentExchangeRate > 0) ? currentExchangeRate : 1350;
+        const totalDollar = totalKrw / rate;
+
+        // 금융 스펙에 맞게 소수점 2자리와 달러 기호 부착
+        expectedAmountSpan.innerText = `$${totalDollar.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    } else {
+        // 일반 적금들은 원화 세 자리 콤마 표기
+        expectedAmountSpan.innerText = `${Math.floor(totalKrw).toLocaleString()}원`;
+    }
+}
+
+// 3. 이벤트 리스너 등록 (금액 입력시, 기간 변경시 실시간 반응)
+document.addEventListener("DOMContentLoaded", () => {
+    const depositInput = document.getElementById("initDeposit");
+    const periodSelect = document.getElementById("period");
+
+    if (depositInput) {
+        depositInput.addEventListener("input", calculateExpectedAmount);
+    }
+    if (periodSelect) {
+        periodSelect.addEventListener("change", calculateExpectedAmount);
+    }
+
+    // 외환 적금 환율 로딩 등 기존 init 로직이 끝난 후 초기 계산 1회 실행
+    setTimeout(calculateExpectedAmount, 500);
+});
+
 
     //선출금-> 가입
     async function executeJoin(event) {
