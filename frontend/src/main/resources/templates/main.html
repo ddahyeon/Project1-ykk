@@ -57,7 +57,7 @@
 
     // 백엔드 API 연동 및 데이터 화면 출력 함수
     function fetchAccountData(userId) {
-        fetch("http://localhost:8080/api/bank/show", {
+        fetch("/api/bank/show", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userid: userId })

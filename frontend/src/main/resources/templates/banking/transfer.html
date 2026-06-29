@@ -46,7 +46,7 @@
 
     // 💡 [추가된 함수] 서버에서 기본 계좌 잔액을 불러와 화면에 뿌려주는 함수
         function loadCurrentBalance(userId) {
-            fetch("http://localhost:8080/api/bank/show", {
+            fetch("/api/bank/show", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
