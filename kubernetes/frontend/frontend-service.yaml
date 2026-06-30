@@ -10,5 +10,4 @@ spec:
   ports:
     - port: 80             # Service 포트
       targetPort: 80       # Frontend Pod 포트
-      nodePort: 30080      # 외부 접속 포트
-  type: NodePort           # 브라우저에서 외부 접속 가능
+  type: ClusterIP
