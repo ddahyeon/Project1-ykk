@@ -19,7 +19,8 @@ spec:
     spec:
       containers:
         - name: ykk-backend
-          image: dahyeoni/ykk-backend:v1    
+          # image: tak47onejoon/ykk_backend 
+          image: dahyeoni/ykk-backend:v1 
           imagePullPolicy: Always              
           ports:
             - containerPort: 8080            # SpringBoot 실행 포트
@@ -39,13 +40,16 @@ spec:
                 configMapKeyRef:
                   name: ykk-config
                   key: DB_NAME                # DB 이름
-            - name: MYSQL_USER
+            - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: MYSQL_USER             # DB 사용자 계정
-            - name: MYSQL_PASSWORD
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: MYSQL_PASSWORD          # DB 비밀번호
+            
+            - name: DB_URL
+              value: jdbc:mysql://mysql-service:3306/ykkdb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
