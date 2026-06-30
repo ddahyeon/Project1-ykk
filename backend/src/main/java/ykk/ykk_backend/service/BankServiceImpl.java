@@ -130,10 +130,10 @@ public class BankServiceImpl implements BankService{
     @Override
     public void RegistGoods(ReqRegist dto) {
         int interestrate = switch (dto.getType()) {
-            case SavingType.NORMAL -> 200;
-            case SavingType.DOLLAR -> 100;
-            case SavingType.COMPOUND -> 50;
-            case SavingType.YOUTH -> 500;
+            case SavingType.NORMAL -> 300;
+            case SavingType.DOLLAR -> 400;
+            case SavingType.COMPOUND -> 500;
+            case SavingType.YOUTH -> 600;
             default -> 0;
         };
 
