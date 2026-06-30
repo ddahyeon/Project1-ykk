@@ -17,10 +17,18 @@ spec:
   - host: ykk.local
     http:                         
       paths:
-      - path: /           
+      - path: /api           
         pathType: Prefix              
         backend:
           service:                
             name: ykk-backend-service                 
             port:
-              number: 8080          
+              number: 8080        
+
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ykk-frontend-service
+            port:
+              number: 80
