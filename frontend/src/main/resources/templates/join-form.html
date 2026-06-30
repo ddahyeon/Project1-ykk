@@ -137,7 +137,16 @@ function calculateExpectedAmount() {
 
     const P = parseInt(depositInput.value) || 0; // 매월 납입 금액 (원화)
     const n = parseInt(periodSelect.value);      // 가입 기간 (개월 수)
-    const r = interestRates[productType] || 0.03; // 현재 상품의 이자율
+    let r = interestRates[productType] || 0.03; // 현재 상품의 이자율
+
+    if(n == 12){
+        r += 0.006
+    }
+    else if(n == 24){
+        r += 0.015
+    }
+
+
 
     if (P <= 0) {
         expectedAmountSpan.innerText = productType === '2' ? "$0.00" : "0원";
@@ -183,6 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
 
         const depositAmount = parseInt(document.getElementById("initDeposit").value);
+        const value = parseInt(document.getElementById("period").value);
+
 
         //가입 금액 유효성 체크
         if (depositAmount <= 0) {
@@ -195,18 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            //선출금
-            const withdrawResponse = await fetch("/api/bank/withdraw", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userid: loginId, amount: depositAmount })
-            });
-
-            if (!withdrawResponse.ok) {
-                alert("기본 계좌에서 가입 금액을 출금하는 데 실패했습니다. 다시 시도해 주세요.");
-                return;
-            }
-
             // 적금 가입 요청
             const registResponse = await fetch("/api/bank/regist", {
                 method: "POST",
@@ -214,7 +213,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({
                     userid: loginId,
                     type: parseInt(productType),
-                    initdeposit: depositAmount
+                    initdeposit: depositAmount,
+                    period: value
+
                 })
             });
 

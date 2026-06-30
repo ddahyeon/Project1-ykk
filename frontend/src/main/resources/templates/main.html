@@ -85,13 +85,13 @@
                 else if (account.savingtype === "NORMAL" || account.savingtype === 1) {
                     hasSaving = true;
                     document.getElementById("saving1Item").style.display = "list-item";
-                    normalTotal += account.amount;
+                    normalTotal += account.amount + account.interest;
                 }
                 // [3] 외환 적금 ("DOLLAR")
                 else if (account.savingtype === "DOLLAR" || account.savingtype === 2) {
                     hasSaving = true;
                     document.getElementById("saving2Item").style.display = "list-item";
-                    dollarTotal += account.amount;
+                    dollarTotal += account.amount + account.interest;
                 }
                 // [4] 복리 적금 ("COMPOUND")
                 else if (account.savingtype === "COMPOUND" || account.savingtype === 3) {
@@ -103,7 +103,7 @@
                 else if (account.savingtype === "YOUTH" || account.savingtype === 4) {
                     hasSaving = true;
                     document.getElementById("saving4Item").style.display = "list-item";
-                    youthTotal += account.amount;
+                    youthTotal += account.amount + account.interest;
                 }
             });
             //합산 출력
